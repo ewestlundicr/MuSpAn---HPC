@@ -30,7 +30,7 @@ def generate_neighbourhoods(domains, label_name, network_type, n_nearest_neighbo
                                 k_hops, phenotype_list, 
                                 neighbourhood_label_name, n_clusters, save_path):
     
-    neighbourhood_enrichment_matrix, consistent_global_labels, unique_cluster_labels, observation_matrix = ms.networks.cluster_neighbourhoods(
+    neighbourhood_enrichment_matrix, consistent_global_labels, unique_cluster_labels, observation_matrix, cluster_labels = ms.networks.cluster_neighbourhoods(
         domains,  # The domain dataset
         label_name=label_name,  # The label to use for clustering
         network_kwargs=dict(network_type=network_type, max_edge_distance=np.inf, min_edge_distance=0, number_of_nearest_neighbours=n_nearest_neighbours),  # The network parameters
@@ -40,7 +40,7 @@ def generate_neighbourhoods(domains, label_name, network_type, n_nearest_neighbo
         cluster_method='minibatchkmeans',  # Clustering method
         cluster_parameters={'n_clusters': n_clusters},  # Parameters for the clustering method
         neighbourhood_enrichment_as='zscore', # Neighbourhood enrichment as log-fold
-        return_observation_matrix=True #return an observation matrix for elbow plot
+        return_observation_matrix_and_labels=True #return an observation matrix for elbow plot
         ) 
     
     var_dict = {"neighbourhood_enrichment_matrix":neighbourhood_enrichment_matrix.tolist(),
@@ -134,4 +134,4 @@ def main(csv_directory, save_path):
     save_domains(domains, save_path)
 
     
-main(r"E:\Amy_muspan\muspanvenv\hpc_test_small_batch", r"E:\Amy_muspan\muspanvenv\hpc_test_outputs")
+main(r"Z:\Amy\hpc_test", r"Z:\Amy\hpc_output")
