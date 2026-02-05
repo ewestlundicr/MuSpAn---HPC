@@ -21,6 +21,13 @@ cd /path/to/where/to/run/script
 git clone git@github.com:ewestlundicr/MuSpAn---HPC.git
 cd MuSpAn---HPC
 ```
+Confirm the repository is correctly cloned by writing
+
+```bash
+ls
+```
+
+and check that the 'run_clustering.sh' and 'run_muspan.py' exists.
 
 ## Step 4 - Create a MuSpAn env and install all required packages
 
@@ -31,16 +38,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Confirm the repository is correctly cloned by writing
-
-```bash
-ls
-```
-
-and check that the 'run_clustering.sh' and 'run_muspan.py' exists.
-
-
-### Step 4* - If you get errors when trying to create the conda environment
+### Step 4* - (Alma first-time users) – Set up Conda/Mamba once for all
 
 ```bash
 module use /opt/software/easybuild/modules/all
@@ -53,7 +51,7 @@ Initiate Conda
 conda init 
 ```
 
-Update source
+Reload your .bashrc file
 
 ```bash
 source ~/.bashrc
@@ -109,9 +107,9 @@ ls
 ```
 to see it in your repo folder. View the error file by running
 ```bash 
-vi muspan_JOBNUMBER.err
+vi muspan_JOB_ID.err
 ```
-where JOBNUMBER is unique to the current job.
+where JOB_ID is unique to the current job.
 
 ---
 
