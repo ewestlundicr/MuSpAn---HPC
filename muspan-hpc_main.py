@@ -1,3 +1,7 @@
+import os
+os.environ['LC_ALL'] = 'C.UTF-8'
+os.environ['LANG'] = 'C.UTF-8'
+
 import muspan as ms
 import pandas as pd
 import numpy as np
@@ -144,9 +148,6 @@ def main(csv_directory, save_path):
     generate_neighbourhood_heatmap(neighbourhood_enrichment_matrix, unique_cluster_labels, consistent_global_labels, save_path, 'heatmap.jpg')
 
     save_domains(domains, save_path)
-
-# remove hardcoded paths
-# main(r"Z:\Amy\hpc_test", r"Z:\Amy\hpc_output")
 
 # replace it with command line options
 if __name__ == "__main__":
