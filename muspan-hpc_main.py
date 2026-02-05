@@ -1,7 +1,3 @@
-import os
-os.environ['LC_ALL'] = 'C.UTF-8'
-os.environ['LANG'] = 'C.UTF-8'
-
 import muspan as ms
 import pandas as pd
 import numpy as np
@@ -14,7 +10,7 @@ import argparse
 
 def create_domains(csv_directory):
     # retrieve list of csv file only
-    csvs = sorted([f for f in os.listdir(csv_directory) if f.lower().endswith(".csv")])
+    csvs = sorted([f for f in os.listdir(csv_directory) if f.lower().endswith(".csv") and not f.lower().startswith("._")])
     
     domains = []
     
@@ -131,7 +127,7 @@ def save_domains(domains, save_path):
         ms.io.domain_to_csv(domain, path_to_save=csv_save, name_of_file= str(domain.name))
 
 def main(csv_directory, save_path):
-
+    print("Creating domains")
     domains = create_domains(csv_directory)
 
     phenotype_list = ['CD8', 'CD8_Other', 'FAP', 'FAP_PDGFRa', 'FAP_PDGFRa_aSMA', 'FAP_PDPN',
@@ -140,14 +136,20 @@ def main(csv_directory, save_path):
                     'PDPN_CD8_Other', 'PDPN_PDGFRa', 'PDPN_PDGFRa_aSMA', 'PDPN_aSMA',
                     'PDPN_panCK', 'PDPN_panCK_Other', 'aSMA', 'panCK', 'panCK_Other', 'unclassified detections']
 
+    print("Finding neighbourhoods")
     neighbourhood_label_name = 'Neighbourhood_ID_KNN_8' # I would avoid spaces in filenames
     neighbourhood_enrichment_matrix, consistent_global_labels, unique_cluster_labels, observation_matrix = generate_neighbourhoods(domains, 'Phenotype', 'KNN', 10, 1, phenotype_list, neighbourhood_label_name, 8, save_path)
 
+    print("Generating elbow plot")
     generate_elbow_plot(observation_matrix, 15, save_path, "elbow_plot.jpg")
 
+    print("Generating heatmap")
     generate_neighbourhood_heatmap(neighbourhood_enrichment_matrix, unique_cluster_labels, consistent_global_labels, save_path, 'heatmap.jpg')
 
+    print("Saving domains")
     save_domains(domains, save_path)
+
+    print("Finished!")
 
 # replace it with command line options
 if __name__ == "__main__":
