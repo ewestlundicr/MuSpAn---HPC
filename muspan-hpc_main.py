@@ -6,16 +6,24 @@ import matplotlib.pyplot as plt
 import os 
 import json
 from sklearn.cluster import KMeans
+import argparse
 
 def create_domains(csv_directory):
-
-    csvs = os.listdir(csv_directory)
-
+    # retrieve list of csv file only
+    csvs = sorted([f for f in os.listdir(csv_directory) if f.lower().endswith(".csv") and not f.lower().startswith("._")])
+    
     domains = []
-    for i, csv in enumerate(csvs):
+    
+    required = ["Cell X Position", "Cell Y Position", "Phenotype", "Parent"]
+
+    for _, csv in enumerate(csvs):
         csv_path = os.path.join(csv_directory,csv)
 
         df = pd.read_csv(csv_path)
+        # add some control over csv content
+        missing = [c for c in required if c not in df.columns]
+        if missing:
+            raise ValueError(f"{csv} missing columns: {missing}")
         points = np.asarray([df["Cell X Position"], df["Cell Y Position"]])
         points[1,:] = -points[1,:]
         domain = ms.domain(str(csv))
@@ -48,7 +56,9 @@ def generate_neighbourhoods(domains, label_name, network_type, n_nearest_neighbo
             "unique_cluster_labels":unique_cluster_labels.tolist(),
             "observation_matrix": observation_matrix.tolist()}
 
-    matrices_path = os.path.join(save_path, neighbourhood_label_name)
+    # safeguard in case save_path doesnt exist
+    os.makedirs(save_path, exist_ok=True)
+    matrices_path = os.path.join(save_path, f"{neighbourhood_label_name}.json") # adding an extension to the filename
 
     with open(matrices_path, "w+") as f:
         json.dump(var_dict, f)
@@ -73,6 +83,7 @@ def generate_elbow_plot(observation_matrix, n_neighbourhoods, save_path, image_n
     plt.ylabel('WCSS (inertia)')
     plt.title('Optimal N for neighbourhood clusters (Elbow)')
     plt.savefig(os.path.join(save_path, image_name), dpi = 300, bbox_inches = 'tight')
+    plt.close()#closing figure to avoid memory leaks
 
 def generate_neighbourhood_heatmap(neighbourhood_enrichment_matrix, unique_cluster_labels, consistent_global_labels, save_path, image_name):
     # Create a DataFrame from the neighbourhood enrichment matrix
@@ -81,7 +92,7 @@ def generate_neighbourhood_heatmap(neighbourhood_enrichment_matrix, unique_clust
     df_ME_id.columns.name = 'Phenotype ID'
 
     # Visualize the neighbourhood enrichment matrix using a clustermap
-    sns.clustermap(
+    g = sns.clustermap(
         df_ME_id,
         xticklabels=consistent_global_labels,
         yticklabels=unique_cluster_labels,
@@ -99,7 +110,8 @@ def generate_neighbourhood_heatmap(neighbourhood_enrichment_matrix, unique_clust
         vmax=2,
         tree_kws={'linewidths': 0, 'color': 'white'}
     )
-    plt.savefig(os.path.join(save_path, image_name))
+    g.savefig(os.path.join(save_path, image_name))
+    plt.close(g.figure) #closing figure to avoid memory leaks
 
 def save_domains(domains, save_path):
     domain_save = os.path.join(save_path, "domains")
@@ -115,7 +127,7 @@ def save_domains(domains, save_path):
         ms.io.domain_to_csv(domain, path_to_save=csv_save, name_of_file= str(domain.name))
 
 def main(csv_directory, save_path):
-
+    print("Creating domains")
     domains = create_domains(csv_directory)
 
     phenotype_list = ['CD8', 'CD8_Other', 'FAP', 'FAP_PDGFRa', 'FAP_PDGFRa_aSMA', 'FAP_PDPN',
@@ -124,14 +136,26 @@ def main(csv_directory, save_path):
                     'PDPN_CD8_Other', 'PDPN_PDGFRa', 'PDPN_PDGFRa_aSMA', 'PDPN_aSMA',
                     'PDPN_panCK', 'PDPN_panCK_Other', 'aSMA', 'panCK', 'panCK_Other', 'unclassified detections']
 
+    print("Finding neighbourhoods")
+    neighbourhood_label_name = 'Neighbourhood_ID_KNN_8' # I would avoid spaces in filenames
+    neighbourhood_enrichment_matrix, consistent_global_labels, unique_cluster_labels, observation_matrix = generate_neighbourhoods(domains, 'Phenotype', 'KNN', 10, 1, phenotype_list, neighbourhood_label_name, 8, save_path)
 
-    neighbourhood_enrichment_matrix, consistent_global_labels, unique_cluster_labels, observation_matrix = generate_neighbourhoods(domains, 'Phenotype', 'KNN', 10, 1, phenotype_list, 'Neighbourhood ID - KNN 8', 8, save_path)
-
+    print("Generating elbow plot")
     generate_elbow_plot(observation_matrix, 15, save_path, "elbow_plot.jpg")
 
+    print("Generating heatmap")
     generate_neighbourhood_heatmap(neighbourhood_enrichment_matrix, unique_cluster_labels, consistent_global_labels, save_path, 'heatmap.jpg')
 
+    print("Saving domains")
     save_domains(domains, save_path)
 
-    
-main(r"Z:\Amy\hpc_test", r"Z:\Amy\hpc_output")
+    print("Finished!")
+
+# replace it with command line options
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run Muspan neighbourhood analysis")
+    parser.add_argument("--inputs", required=True, help="Directory containing CSV files")
+    parser.add_argument("--output", required=True, help="Output directory")
+
+    args = parser.parse_args()
+    main(args.inputs, args.output)
