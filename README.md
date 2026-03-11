@@ -61,9 +61,9 @@ Try step 4 again.
 
 ## Step 5 - Find the script you want to run
 Current options are 
-- Neighbourhood
+- Neighbourhood:
 Find a set number of neighbourhoods over your domains
-- Proximity
+- Proximity:
 Find the distance between cells of certain types over your domains
 
 Go to the README for each pipeline inside the directories.
