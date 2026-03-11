@@ -3,7 +3,18 @@ This repository contains scripts to run Muspan-based neighbourhood analysis on s
 
 # Make sure you have done step 1-4 for the initial start-up, or 1-3 if you have used this script before
 
-## Step 1 - Edit the `run_neighbourhood.sh` script to specify the input and output directories
+## Step 1 - Navigate to the muspan-neighbourhood directory
+Run
+```bash 
+cd muspan-neighbourhood
+```
+and run
+```bash 
+ls
+```
+to see the two scripts "muspan-hpc_neighbourhood.py" and "run_neighbourhood.sh"
+
+## Step 2 - Edit the `run_neighbourhood.sh` script to specify the input and output directories
 
 Open the 'run_neighbourhood.sh' script in the editor
 ```bash
@@ -18,7 +29,7 @@ Click 'esc' on the keyboard to leave editing mode.
 
 Close the vi-viewer by writing ':wq' and press enter on the keyboard.
 
-## Step 2 - Make the script executable 
+## Step 3 - Make the script executable 
 
 ```bash 
 chmod +x run_neighbourhood.sh
@@ -30,13 +41,13 @@ ls
 ```
 and check that 'run_neighbourhood.sh' is green.
 
-## Step 3 - Submit the job to HPC
+## Step 4 - Submit the job to HPC
 
 ```bash 
 sbatch run_neighbourhood.sh
 ```
 
-## Step 4 - Check status
+## Step 5 - Check status
 
 ```bash 
 squeue -u $USER
