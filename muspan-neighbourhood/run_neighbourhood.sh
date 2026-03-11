@@ -17,6 +17,6 @@ source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate muspan_env
 
 # Run Muspan
-python muspan-hpc_main.py \
+python muspan-hpc_neighbourhood.py \
   --inputs /data/path/samples \
   --output /data/path/results
