@@ -145,7 +145,7 @@ def main(csv_directory, save_path, n_neighbourhoods, csvpath):
 
     print("Finding neighbourhoods")
     neighbourhood_label_name = 'Neighbourhood_ID_KNN_'+str(n_neighbourhoods) # I would avoid spaces in filenames
-    neighbourhood_enrichment_matrix, consistent_global_labels, unique_cluster_labels, observation_matrix = generate_neighbourhoods(domains, neighbourhood_marker, 'KNN', 10, 1, phenotype_list, neighbourhood_label_name, n_neighbourhoods, save_path)
+    neighbourhood_enrichment_matrix, consistent_global_labels, unique_cluster_labels, observation_matrix = generate_neighbourhoods(domains, neighbourhood_marker, 'KNN', 10, 1, phenotype_list, neighbourhood_label_name, int(n_neighbourhoods), save_path)
 
     print("Generating elbow plot")
     generate_elbow_plot(observation_matrix, 15, save_path, "elbow_plot.jpg")
