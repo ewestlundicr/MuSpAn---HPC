@@ -5,34 +5,45 @@ import seaborn as sns
 import matplotlib.pyplot as plt 
 import os 
 import json
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, MiniBatchKMeans
 import argparse
 
-def create_domains(csv_directory):
+def create_domains(csv_directory, csv_labels, domain_labels):
     # retrieve list of csv file only
     csvs = sorted([f for f in os.listdir(csv_directory) if f.lower().endswith(".csv") and not f.lower().startswith("._")])
     
     domains = []
-    
-    required = ["Cell X Position", "Cell Y Position", "Phenotype", "Parent"]
 
     for _, csv in enumerate(csvs):
         csv_path = os.path.join(csv_directory,csv)
 
         df = pd.read_csv(csv_path)
         # add some control over csv content
-        missing = [c for c in required if c not in df.columns]
+        missing = [c for c in csv_labels if c not in df.columns]
         if missing:
             raise ValueError(f"{csv} missing columns: {missing}")
-        points = np.asarray([df["Cell X Position"], df["Cell Y Position"]])
+        points = np.asarray([df[csv_labels[0]], df[csv_labels[1]]])
         points[1,:] = -points[1,:]
         domain = ms.domain(str(csv))
         domain.add_points(points.T, "Cell centres")
-        domain.add_labels("Phenotype", df["Phenotype"])
-        domain.add_labels("ROI", df["Parent"])
+        for i in range(2, len(csv_labels)):
+            domain.add_labels(domain_labels[i], df[csv_labels[i]])   
         domains.append(domain)
        
     return domains
+
+def get_input_from_file(path):
+    df = pd.read_csv(path)
+
+    header = df.columns.tolist()
+
+    phenotype_marker = header[2]
+
+    csv_labels = df[header[0]].dropna().tolist()
+    domain_labels = df[header[1]].dropna().tolist()
+    markers = df[header[2]].dropna().tolist()
+
+    return csv_labels, domain_labels, phenotype_marker, markers
 
 def generate_neighbourhoods(domains, label_name, network_type, n_nearest_neighbours,
                                 k_hops, phenotype_list, 
@@ -41,7 +52,7 @@ def generate_neighbourhoods(domains, label_name, network_type, n_nearest_neighbo
     neighbourhood_enrichment_matrix, consistent_global_labels, unique_cluster_labels, observation_matrix, cluster_labels = ms.networks.cluster_neighbourhoods(
         domains,  # The domain dataset
         label_name=label_name,  # The label to use for clustering
-        network_kwargs=dict(network_type=network_type, max_edge_distance=np.inf, min_edge_distance=0, number_of_nearest_neighbours=n_nearest_neighbours),  # The network parameters
+        network_kwargs=dict(network_type=network_type, max_edge_distance=50, min_edge_distance=0, number_of_nearest_neighbours=n_nearest_neighbours),  # The network parameters
         k_hops=k_hops,  # The number of hops to consider for the neighbourhood
         force_labels_to_include=phenotype_list,
         neighbourhood_label_name=neighbourhood_label_name,  # Name for the neighbourhood label
@@ -54,7 +65,8 @@ def generate_neighbourhoods(domains, label_name, network_type, n_nearest_neighbo
     var_dict = {"neighbourhood_enrichment_matrix":neighbourhood_enrichment_matrix.tolist(),
             "consistent_global_labels": consistent_global_labels,
             "unique_cluster_labels":unique_cluster_labels.tolist(),
-            "observation_matrix": observation_matrix.tolist()}
+            "observation_matrix": observation_matrix.tolist(),
+            "cluster_labels": cluster_labels.tolist()}
 
     # safeguard in case save_path doesnt exist
     os.makedirs(save_path, exist_ok=True)
@@ -73,7 +85,7 @@ def generate_elbow_plot(observation_matrix, n_neighbourhoods, save_path, image_n
     K_range = range(1,n_neighbourhoods) #candidate n_clusters
 
     for k in K_range:
-        kmeans = KMeans(n_clusters=k, random_state = 42)
+        kmeans = MiniBatchKMeans(n_clusters=k, random_state = 42)
         kmeans.fit(obs_mat)
         wcss.append(kmeans.inertia_) #inertia_ = sum of squared distances to cluster centres
 
@@ -126,19 +138,14 @@ def save_domains(domains, save_path):
         ms.io.save_domain(domain, path_to_save=domain_save, name_of_file= str(domain.name))
         ms.io.domain_to_csv(domain, path_to_save=csv_save, name_of_file= str(domain.name))
 
-def main(csv_directory, save_path):
+def main(csv_directory, save_path, n_neighbourhoods, csvpath):
     print("Creating domains")
-    domains = create_domains(csv_directory)
-
-    phenotype_list = ['CD8', 'CD8_Other', 'FAP', 'FAP_PDGFRa', 'FAP_PDGFRa_aSMA', 'FAP_PDPN',
-                   'FAP_PDPN_PDGFRa', 'FAP_PDPN_PDGFRa_aSMA', 'FAP_PDPN_aSMA', 'FAP_PDPN_panCK',
-                    'FAP_aSMA', 'FAP_panCK', 'Other', 'PDGFRa', 'PDGFRa_aSMA', 'PDPN', 'PDPN_CD8',
-                    'PDPN_CD8_Other', 'PDPN_PDGFRa', 'PDPN_PDGFRa_aSMA', 'PDPN_aSMA',
-                    'PDPN_panCK', 'PDPN_panCK_Other', 'aSMA', 'panCK', 'panCK_Other', 'unclassified detections']
+    csv_labels, domain_labels, neighbourhood_marker, phenotype_list = get_input_from_file(csvpath)
+    domains = create_domains(csv_directory, csv_labels, domain_labels)
 
     print("Finding neighbourhoods")
-    neighbourhood_label_name = 'Neighbourhood_ID_KNN_8' # I would avoid spaces in filenames
-    neighbourhood_enrichment_matrix, consistent_global_labels, unique_cluster_labels, observation_matrix = generate_neighbourhoods(domains, 'Phenotype', 'KNN', 10, 1, phenotype_list, neighbourhood_label_name, 8, save_path)
+    neighbourhood_label_name = 'Neighbourhood_ID_KNN_'+str(n_neighbourhoods) # I would avoid spaces in filenames
+    neighbourhood_enrichment_matrix, consistent_global_labels, unique_cluster_labels, observation_matrix = generate_neighbourhoods(domains, neighbourhood_marker, 'KNN', 10, 1, phenotype_list, neighbourhood_label_name, n_neighbourhoods, save_path)
 
     print("Generating elbow plot")
     generate_elbow_plot(observation_matrix, 15, save_path, "elbow_plot.jpg")
@@ -156,6 +163,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Muspan neighbourhood analysis")
     parser.add_argument("--inputs", required=True, help="Directory containing CSV files")
     parser.add_argument("--output", required=True, help="Output directory")
+    parser.add_argument("--n_neighbourhoods", required=True, help="Integer for number of neighbourhoods to find")
+    parser.add_argument("--csvpath", required=True, help="Path to csv containing labels for domain and markers for neighbourhood clustering")
 
     args = parser.parse_args()
-    main(args.inputs, args.output)
+    main(args.inputs, args.output, args.n_neighbourhoods, args.csvpath)

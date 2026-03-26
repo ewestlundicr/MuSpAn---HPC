@@ -19,4 +19,6 @@ conda activate muspan_env
 # Run Muspan
 python muspan-hpc_neighbourhood.py \
   --inputs /data/path/samples \
-  --output /data/path/results
+  --output /data/path/results \
+  --n_neighbourhoods integer \
+  --csvpath /data/path/csv/with/input
