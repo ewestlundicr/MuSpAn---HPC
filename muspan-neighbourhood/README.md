@@ -24,6 +24,22 @@ vi run_neighbourhood.sh
 Click 'i' on the keyboard to initiate editing mode. Update the --input and --output paths.
 * `Inputs`: directory on Alma containing CSV files with cell coordinates and labels
 * `Output`: directory on Alma where results (JSON, plots, domains) will be written
+* `n_neighbourhoods`: integer for number of recuring cellular neighbourhoods to find
+* `csvpath`: path to a csv file containing three columns with csv labels names, domain label names, and marker of interest for generating neighbourhoods. NOTE: Header for marker of interest must match the domain label name.
+
+### Example:
+
+
+| CSV Label | Domain Labels | Phenotype |
+|----------|----------|----------|
+| Cell X Position    |      X    | CD8         |
+| Cell Y Position    |      Y    |    FAP      |
+| Phenotype    |   Phenotype       |     panCK     |
+| Parent    |   ROI    |          |
+
+* CSV Label entries need to match the headers in the input csvs
+* Domain Labels entries are the name of the labels in the domains
+* Phenotype header matches name of Phenotype label in domain, with the entries matching available categories for the label
 
 Click 'esc' on the keyboard to leave editing mode. 
 
