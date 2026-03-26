@@ -25,4 +25,4 @@ python muspan-hpc_proximity.py \
   --output /data/path/results \
   --path_classes_to_investigate /data/path/classes \
   --max_edge_distance integer_for_proximity_network \
-  --create_total_arrays boolean_true_false
+  --create_total_arrays boolean_0_1

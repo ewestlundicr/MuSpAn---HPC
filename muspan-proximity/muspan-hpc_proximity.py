@@ -121,6 +121,7 @@ def save_total_arrays(output_directory):
     np.save(os.path.join(array_save, "norm_array_with_itself"), norm_array_with_itself)
     np.save(os.path.join(array_save, "norm_array_without_itself"), norm_array_without_itself)
 
+
 def main(input_directory, output_directory, path_classes_to_investigate, max_edge_distance, create_total_arrays):
     domains_list = get_domain_list(input_directory)
 
