@@ -96,7 +96,7 @@ def get_contacts_clusters_of_interest(domain, clusters_of_interest, label_of_int
     np.save(os.path.join(array_save, f"{domain.name}_array.npy"), total_contacts)
     return total_contacts
 
-
+# this is the merging step that reads from already create .npy files and produces a combined_array
 def save_total_arrays(output_directory):
     array_input = os.path.join(output_directory, "domain_arrays")
     array_save = os.path.join(output_directory, "combined_arrays")
