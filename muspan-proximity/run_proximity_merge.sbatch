@@ -11,8 +11,8 @@ set -euo pipefail
 # -----------------------------
 # User settings
 # -----------------------------
-OUTPUT_DIR="/path/to/output"
-PROXIMITY_SCRIPT="/path/to/muspan-hpc_proximity.py"
+OUTPUT_DIR=$1
+PROXIMITY_SCRIPT="muspan-hpc_proximity.py"
 
 source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate muspan_env

@@ -12,12 +12,13 @@ set -euo pipefail
 # -----------------------------
 # User settings
 # -----------------------------
-INPUT_DIR="/path/to/domains"
-OUTPUT_DIR="/path/to/output"
-CLASSES="/path/to/classes"
-PROXIMITY_SCRIPT="/path/to/muspan-hpc_proximity.py"
-DOMAIN_LIST="/path/to/domain_list.txt"
-MAX_EDGE_DISTANCE=20
+INPUT_DIR="$1"
+OUTPUT_DIR="$2"
+CLASSES="$3"
+DOMAIN_LIST="$4" # the .txt file that contains the list of domain path
+MAX_EDGE_DISTANCE="$5"
+
+PROXIMITY_SCRIPT="muspan-hpc_proximity.py"
 
 # Initialise conda
 source "$(conda info --base)/etc/profile.d/conda.sh"

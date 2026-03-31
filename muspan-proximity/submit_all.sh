@@ -3,8 +3,48 @@ set -euo pipefail
 
 mkdir -p logs
 
-ARRAY_JOB_ID=$(sbatch run_promixity_array.sbatch | awk '{print $4}')
+# Default values (optional)
+INPUT_DIR=""
+OUTPUT_DIR=""
+CLASSES=""
+DOMAIN_LIST=""
+MAX_EDGE_DISTANCE=20
+
+# -----------------------------
+# Parse named arguments
+# -----------------------------
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --input_dir) INPUT_DIR="$2"; shift 2 ;;
+        --output_dir) OUTPUT_DIR="$2"; shift 2 ;;
+        --classes) CLASSES="$2"; shift 2 ;;
+        --domain_list) DOMAIN_LIST="$2"; shift 2 ;;
+        --max_edge_distance) MAX_EDGE_DISTANCE="$2"; shift 2 ;;
+        *) echo "Unknown parameter: $1"; exit 1 ;;
+    esac
+done
+
+# -----------------------------
+# Validate required arguments
+# -----------------------------
+: "${INPUT_DIR:?Missing --input_dir}"
+: "${OUTPUT_DIR:?Missing --output_dir}"
+: "${CLASSES:?Missing --classes}"
+: "${DOMAIN_LIST:?Missing --domain_list}"
+: "${MAX_EDGE_DISTANCE:?Missing --max_edge_distance}"
+
+# -----------------------------
+# Submit jobs
+# -----------------------------
+ARRAY_JOB_ID=$(sbatch run_proximity_array.sbatch \
+    "${INPUT_DIR}" "${OUTPUT_DIR}" "${CLASSES}" "${DOMAIN_LIST}" "${MAX_EDGE_DISTANCE}" \
+    | awk '{print $4}')
+
 echo "Submitted array job: ${ARRAY_JOB_ID}"
 
-MERGE_JOB_ID=$(sbatch --dependency=afterok:${ARRAY_JOB_ID} run_proximity_merge.sbatch | awk '{print $4}')
+MERGE_JOB_ID=$(sbatch \
+    --dependency=afterok:${ARRAY_JOB_ID} \
+    run_proximity_merge.sbatch "${OUTPUT_DIR}" \
+    | awk '{print $4}')
+
 echo "Submitted merge job: ${MERGE_JOB_ID}"
