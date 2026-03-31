@@ -174,19 +174,24 @@ def main(input_directory, output_directory, path_classes_to_investigate, max_edg
     if int(create_total_arrays) == 1:
         save_total_arrays(output_directory)
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Muspan neighbourhood analysis")
-    parser.add_argument("--inputs", required=True, help="Directory containing domains")
-    parser.add_argument("--output", required=True, help="Output directory")
-    parser.add_argument("--path_classes_to_investigate", required=True, help="Path to csv-file with classes to investigate")
-    parser.add_argument("--max_edge_distance", required=True, help="Max edge distance for proximity network")
-    parser.add_argument("--create_total_arrays", required=True, help="0 = False or 1 = True to create total array")
+    parser.add_argument("--inputs", required=False, help="Directory containing domains")
+    parser.add_argument("--output", required=True, help="Output directory, to be used for merging")
+    parser.add_argument("--path_classes_to_investigate", required=False, help="Path to csv-file with classes to investigate")
+    parser.add_argument("--max_edge_distance", required=False, help="Max edge distance for proximity network")
+    parser.add_argument("--create_total_arrays", required=False, help="0 = False or 1 = True to create total array")
     parser.add_argument("--domain", required=False, help="Optional single domain path for array jobs")
+    parser.add_argument("--merge_only", action="store_true", help="Only merge arrays")
 
     args = parser.parse_args()
 
-    if args.domain:
+    # MERGE ONLY MODE
+    if args.merge_only:
+        print("Running merge only...")
+        save_total_arrays(args.output)
+    # SINGLE DOMAIN MODE (array jobs)
+    elif args.domain:
         process_one_domain(
             domain_path=args.domain,
             output_directory=args.output,
@@ -194,6 +199,7 @@ if __name__ == "__main__":
             max_edge_distance=int(args.max_edge_distance),
             save_updated_domain=False
         )
+    # FULL SERIAL MODE
     else:
         main(
             args.inputs,
