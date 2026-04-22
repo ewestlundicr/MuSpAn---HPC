@@ -10,6 +10,7 @@ CLASSES=""
 DOMAIN_LIST=""
 MAX_EDGE_DISTANCE=20
 SAVE_DOMAIN=false
+SKIP_MERGE=false
 
 # -----------------------------
 # Parse named arguments
@@ -22,6 +23,7 @@ while [[ "$#" -gt 0 ]]; do
         --domain_list) DOMAIN_LIST="$2"; shift 2 ;;
         --max_edge_distance) MAX_EDGE_DISTANCE="$2"; shift 2 ;;
         --save_domain) SAVE_DOMAIN=true; shift 1 ;;
+        --skip_merge) SKIP_MERGE=true; shift 1 ;;
         *) echo "Unknown parameter: $1"; exit 1 ;;
     esac
 done
@@ -44,9 +46,12 @@ ARRAY_JOB_ID=$(sbatch run_proximity_array.sbatch \
 
 echo "Submitted array job: ${ARRAY_JOB_ID}"
 
-MERGE_JOB_ID=$(sbatch \
-    --dependency=afterok:${ARRAY_JOB_ID} \
-    run_proximity_merge.sbatch "${OUTPUT_DIR}" \
-    | awk '{print $4}')
-
-echo "Submitted merge job: ${MERGE_JOB_ID}"
+if [ "${SKIP_MERGE}" = "false" ]; then
+    MERGE_JOB_ID=$(sbatch \
+        --dependency=afterok:${ARRAY_JOB_ID} \
+        run_proximity_merge.sbatch "${OUTPUT_DIR}" \
+        | awk '{print $4}')
+    echo "Submitted merge job: ${MERGE_JOB_ID}"
+else
+    echo "Skipping merge step (--skip_merge was set)."
+fi

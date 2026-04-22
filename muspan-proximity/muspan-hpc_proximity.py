@@ -158,7 +158,7 @@ def process_one_domain(domain_path, output_directory, path_classes_to_investigat
     )
 
 
-def main(input_directory, output_directory, path_classes_to_investigate, max_edge_distance, create_total_arrays, save_updated_domain=False):
+def main(input_directory, output_directory, path_classes_to_investigate, max_edge_distance, save_updated_domain=False):
     domains_list = get_domain_list(input_directory)
 
     for domain_name in domains_list:
@@ -171,16 +171,12 @@ def main(input_directory, output_directory, path_classes_to_investigate, max_edg
             save_updated_domain=save_updated_domain
         )
 
-    if int(create_total_arrays) == 1:
-        save_total_arrays(output_directory)
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Muspan neighbourhood analysis")
     parser.add_argument("--inputs", required=False, help="Directory containing domains")
     parser.add_argument("--output", required=True, help="Output directory, to be used for merging")
     parser.add_argument("--path_classes_to_investigate", required=False, help="Path to csv-file with classes to investigate")
     parser.add_argument("--max_edge_distance", required=False, help="Max edge distance for proximity network")
-    parser.add_argument("--create_total_arrays", required=False, help="0 = False or 1 = True to create total array")
     parser.add_argument("--domain", required=False, help="Optional single domain path for array jobs")
     parser.add_argument("--merge_only", action="store_true", help="Only merge arrays")
     parser.add_argument("--save_domain", action="store_true", help="Save updated domain")
@@ -207,6 +203,5 @@ if __name__ == "__main__":
             args.output,
             args.path_classes_to_investigate,
             int(args.max_edge_distance),
-            int(args.create_total_arrays),
             args.save_domain
         )

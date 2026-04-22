@@ -62,13 +62,11 @@ if [ "${SAVE_DOMAIN}" = "true" ]; then
     SAVE_DOMAIN_FLAG="--save_domain"
 fi
 
-# run the proximity script without attempting a merge step
+# run the proximity script on a single domain
 python "${PROXIMITY_SCRIPT}" \
-    --inputs "${INPUT_DIR}" \
     --output "${OUTPUT_DIR}" \
     --path_classes_to_investigate "${CLASSES}" \
     --max_edge_distance "${MAX_EDGE_DISTANCE}" \
-    --create_total_arrays 0 \
     --domain "${DOMAIN_PATH}" \
     ${SAVE_DOMAIN_FLAG}
 
