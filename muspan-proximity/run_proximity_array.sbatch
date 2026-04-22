@@ -17,6 +17,7 @@ OUTPUT_DIR="$2"
 CLASSES="$3"
 DOMAIN_LIST="$4" # the .txt file that contains the list of domain path
 MAX_EDGE_DISTANCE="$5"
+SAVE_DOMAIN="${6:-false}"
 
 PROXIMITY_SCRIPT="muspan-hpc_proximity.py"
 
@@ -55,6 +56,12 @@ echo "Domain path: ${DOMAIN_PATH}"
 echo "Start time: $(date)"
 echo "=================================================="
 
+# pass option to save or not the domain
+SAVE_DOMAIN_FLAG=""
+if [ "${SAVE_DOMAIN}" = "true" ]; then
+    SAVE_DOMAIN_FLAG="--save_domain"
+fi
+
 # run the proximity script without attempting a merge step
 python "${PROXIMITY_SCRIPT}" \
     --inputs "${INPUT_DIR}" \
@@ -62,7 +69,8 @@ python "${PROXIMITY_SCRIPT}" \
     --path_classes_to_investigate "${CLASSES}" \
     --max_edge_distance "${MAX_EDGE_DISTANCE}" \
     --create_total_arrays 0 \
-    --domain "${DOMAIN_PATH}"
+    --domain "${DOMAIN_PATH}" \
+    ${SAVE_DOMAIN_FLAG}
 
 echo "Finished domain: ${DOMAIN_NAME}"
 echo "End time: $(date)"

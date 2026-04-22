@@ -96,7 +96,7 @@ def get_contacts_clusters_of_interest(domain, clusters_of_interest, label_of_int
     np.save(os.path.join(array_save, f"{domain.name}_array.npy"), total_contacts)
     return total_contacts
 
-# this is the merging step that reads from already create .npy files and produces a combined_array
+# this is the merging step that reads from already created .npy files and produces a combined_array
 def save_total_arrays(output_directory):
     array_input = os.path.join(output_directory, "domain_arrays")
     array_save = os.path.join(output_directory, "combined_arrays")
@@ -158,7 +158,7 @@ def process_one_domain(domain_path, output_directory, path_classes_to_investigat
     )
 
 
-def main(input_directory, output_directory, path_classes_to_investigate, max_edge_distance, create_total_arrays):
+def main(input_directory, output_directory, path_classes_to_investigate, max_edge_distance, create_total_arrays, save_updated_domain=False):
     domains_list = get_domain_list(input_directory)
 
     for domain_name in domains_list:
@@ -168,7 +168,7 @@ def main(input_directory, output_directory, path_classes_to_investigate, max_edg
             output_directory=output_directory,
             path_classes_to_investigate=path_classes_to_investigate,
             max_edge_distance=int(max_edge_distance),
-            save_updated_domain=False
+            save_updated_domain=save_updated_domain
         )
 
     if int(create_total_arrays) == 1:
@@ -183,6 +183,7 @@ if __name__ == "__main__":
     parser.add_argument("--create_total_arrays", required=False, help="0 = False or 1 = True to create total array")
     parser.add_argument("--domain", required=False, help="Optional single domain path for array jobs")
     parser.add_argument("--merge_only", action="store_true", help="Only merge arrays")
+    parser.add_argument("--save_domain", action="store_true", help="Save updated domain")
 
     args = parser.parse_args()
 
@@ -197,7 +198,7 @@ if __name__ == "__main__":
             output_directory=args.output,
             path_classes_to_investigate=args.path_classes_to_investigate,
             max_edge_distance=int(args.max_edge_distance),
-            save_updated_domain=False
+            save_updated_domain=args.save_domain
         )
     # FULL SERIAL MODE
     else:
@@ -206,5 +207,6 @@ if __name__ == "__main__":
             args.output,
             args.path_classes_to_investigate,
             int(args.max_edge_distance),
-            int(args.create_total_arrays)
+            int(args.create_total_arrays),
+            args.save_domain
         )

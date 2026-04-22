@@ -8,7 +8,8 @@ To run the analysis:
   --output_dir /data/output \ 
   --classes /data/classes \ 
   --domain_list domain_list.txt \ 
-  --max_edge_distance 20
+  --max_edge_distance 20 \
+  --save_domain      # optional: save updated domain and CSV after adding the proximity network, default to false
 ```
 
 ## About `run_proximity_array.sbatch` 
@@ -40,8 +41,9 @@ wc -l domain_list.txt
 
 ### How to run `run_proximity_array.sbatch`
 ```bash
-sbatch run_proximity_array.sbatch input_dir output_dir classes_file domain_list_file max_edge_distance_int
+sbatch run_proximity_array.sbatch input_dir output_dir classes_file domain_list_file max_edge_distance_int [true|false]
 ```
+The optional 6th argument enables domain saving (`true` saves the domain and a CSV after the proximity network is added; defaults to `false`).
 
 ## About `run_proximity_merge.sbatch`
 

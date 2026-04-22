@@ -9,6 +9,7 @@ OUTPUT_DIR=""
 CLASSES=""
 DOMAIN_LIST=""
 MAX_EDGE_DISTANCE=20
+SAVE_DOMAIN=false
 
 # -----------------------------
 # Parse named arguments
@@ -20,6 +21,7 @@ while [[ "$#" -gt 0 ]]; do
         --classes) CLASSES="$2"; shift 2 ;;
         --domain_list) DOMAIN_LIST="$2"; shift 2 ;;
         --max_edge_distance) MAX_EDGE_DISTANCE="$2"; shift 2 ;;
+        --save_domain) SAVE_DOMAIN=true; shift 1 ;;
         *) echo "Unknown parameter: $1"; exit 1 ;;
     esac
 done
@@ -37,7 +39,7 @@ done
 # Submit jobs
 # -----------------------------
 ARRAY_JOB_ID=$(sbatch run_proximity_array.sbatch \
-    "${INPUT_DIR}" "${OUTPUT_DIR}" "${CLASSES}" "${DOMAIN_LIST}" "${MAX_EDGE_DISTANCE}" \
+    "${INPUT_DIR}" "${OUTPUT_DIR}" "${CLASSES}" "${DOMAIN_LIST}" "${MAX_EDGE_DISTANCE}" "${SAVE_DOMAIN}" \
     | awk '{print $4}')
 
 echo "Submitted array job: ${ARRAY_JOB_ID}"
