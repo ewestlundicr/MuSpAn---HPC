@@ -1,4 +1,4 @@
-# Muspan Neighbourhood Analysis (HPC)
+# MuSpAn Templates to be run on HPC
 This repository contains scripts to run Muspan-based neighbourhood analysis on spatial single-cell data using an AlmaLinux HPC environment (SLURM).
 
 # First Time Setup
@@ -59,57 +59,14 @@ source ~/.bashrc
 
 Try step 4 again.
 
+## Step 5 - Find the script you want to run
+Current options are 
+- Neighbourhood:
+Find a set number of neighbourhoods over your domains
+- Proximity:
+Find the distance between cells of certain types over your domains
 
-## Step 5 - Edit the `run_clustering.sh` script to specify the input and output directories
-
-Open the 'run_clustering.sh' script in the editor
-```bash
-vi run_clustering.sh
-```
-
-Click 'i' on the keyboard to initiate editing mode. Update the --input and --output paths.
-* `Inputs`: directory on Alma containing CSV files with cell coordinates and labels
-* `Output`: directory on Alma where results (JSON, plots, domains) will be written
-
-Click 'esc' on the keyboard to leave editing mode. 
-
-Close the vi-viewer by writing ':wq' and press enter on the keyboard.
-
-
-## Step 6 - Make the script executable 
-
-```bash 
-chmod +x run_clustering.sh
-```
-
-Confirm that it is executable by running
-```bash
-ls
-```
-and check that 'run_clustering.sh' is green.
-
-## Step 7 - Submit the job to HPC
-
-```bash 
-sbatch run_clustering.sh
-```
-
-## Step 8 - Check status
-
-```bash 
-squeue -u $USER
-```
-Can be run multiple times while script is running.
-
-An error and output file will be created if the script fails. Run
-```bash 
-ls
-```
-to see it in your repo folder. View the error file by running
-```bash 
-vi muspan_JOB_ID.err
-```
-where JOB_ID is unique to the current job.
+Go to the README for each pipeline inside the directories.
 
 ---
 
@@ -136,49 +93,5 @@ Pulling will overwrite the current state of 'run_clustering.sh' and 'run_muspan.
 git pull
 ```
 
-## Recommended Step 4 - Check/update --input and --output directories
-
-```bash
-vi run_clustering.sh
-```
-
-Click 'i' on the keyboard to initiate editing mode. Update the --input and --output paths.
-* `Inputs`: directory on Alma containing CSV files with cell coordinates and labels
-* `Output`: directory on Alma where results (JSON, plots, domains) will be written
-
-
-## Step 5 - Make the script executable 
-Check if 'run_clustering.sh' is already executable. Write
-
-```bash
-ls
-```
-and check if 'run_clustering.sh' is green.
-
-If not green, run
-```bash 
-chmod +x run_clustering.sh
-```
-
-## Step 6 - Submit the job to HPC
-
-```bash 
-sbatch run_clustering.sh
-```
-
-## Step 7 - Check status
-
-```bash 
-squeue -u $USER
-```
----
-
-
-# Outputs
-The pipeline generates:
-* Neighbourhood enrichment matrices (.json)
-* Elbow plot (elbow_plot.jpg)
-* Neighbourhood heatmap (heatmap.jpg)
-* Saved Muspan domains
-* CSV exports of domains
-All outputs are written to the `specified output directory`.
+## Step 4 - Find the script you want to run
+Follow the instructions from the README in each respective directory.

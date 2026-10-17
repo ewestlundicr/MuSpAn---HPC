@@ -5,6 +5,8 @@
 #SBATCH --time=06:00:00
 #SBATCH --cpus-per-task=48
 #SBATCH --partition=compute
+#SBATCH --mail-user=insert-email
+#SBATCH --mail-type=FAIL
 
 # Fail fast if anything breaks
 set -euo pipefail
@@ -17,6 +19,7 @@ source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate muspan_env
 
 # Run Muspan
-python muspan-hpc_main.py \
+python muspan-hpc_nearestneighbour.py \
   --inputs /data/path/samples \
-  --output /data/path/results
+  --output /data/path/results \
+  --classes_csv /data/path/classes
