@@ -31,7 +31,7 @@ def load_domains(directory):
     return domains
 
 
-def get_min_dist(domains, class_A, class_B, output):
+def get_min_dist(domains, class_A, class_B, domain_label, null, output):
     for domain in domains:
         raw_null_dist = {} 
         for i in range(len(class_B)):
@@ -39,8 +39,8 @@ def get_min_dist(domains, class_A, class_B, output):
 
             distances_data = {}
 
-            object_indices_A = ms.query.interpret_query(ms.query.query(domain, ('label', 'Phenotype'), 'in', class_A))
-            object_indices_B = ms.query.interpret_query(ms.query.query(domain, ('label', 'Phenotype'), 'is', [cur_class_B]))
+            object_indices_A = ms.query.interpret_query(ms.query.query(domain, ('label', domain_label), 'in', class_A))
+            object_indices_B = ms.query.interpret_query(ms.query.query(domain, ('label', domain_label), 'is', [cur_class_B]))
 
             try:
                 min_dist_A_B,_,nearest_B,_,_ = ms.query.get_minimum_distances_centroids(domain, object_indices_A, object_indices_B)
@@ -52,22 +52,24 @@ def get_min_dist(domains, class_A, class_B, output):
                 domain.add_labels(label_name=label_name, labels=min_dist_A_B, add_labels_to=object_indices_A)
                 domain.add_labels(label_name=f"Nearest {cur_class_B}_ID", labels=nearest_B, add_labels_to=object_indices_A)
 
-                print(f"Finding null distribution for {cur_class_B}")
-                raw_null_dist[f"{domain.name.replace('.csv', '')}_{cur_class_B}"] = list(null_dist(domain, object_indices_A, object_indices_B))
-                print("Null distribution found")
-
+                if null['ind']:
+                    print(f"Finding null distribution for {cur_class_B}")
+                    raw_null_dist[f"{domain.name.replace('.csv', '')}_{cur_class_B}"] = list(null_dist(domain, object_indices_A, object_indices_B))
+                    print("Null distribution found")
 
             except:
                 continue
 
-        try:
-            print("Finding null distribution for any CAF")
-            ids_1 = ms.query.interpret_query(ms.query.query(domain, ('label', 'Phenotype'), 'in', class_A))
-            ids_2 = ms.query.interpret_query(ms.query.query(domain, ('label', 'Phenotype'), 'in', class_B))
-            raw_null_dist[domain.name+"_anyCAF"] = list(null_dist(domain, ids_1, ids_2))
-            print("Null distribution found")
-        except:
-            continue
+
+        if null['full']:
+            try:
+                print("Finding null distribution for any in class B")
+                ids_1 = ms.query.interpret_query(ms.query.query(domain, ('label', domain_label), 'in', class_A))
+                ids_2 = ms.query.interpret_query(ms.query.query(domain, ('label', domain_label), 'in', class_B))
+                raw_null_dist[domain.name+"_anyCAF"] = list(null_dist(domain, ids_1, ids_2))
+                print("Null distribution found")
+            except:
+                continue
 
 
         ms.io.domain_to_csv(domain, path_to_save=output, name_of_file=domain.name)
@@ -101,14 +103,16 @@ def null_dist(domain, ids_1, ids_2, n_perm=999, seed=None):
 
     return null_stats
 
-def main(input, output, path_to_classes_csv):
+def main(input, output, path_to_classes_csv, domain_label, null_dist):
     class_A, class_B = get_classes(path_to_classes_csv)
 
     domains = load_domains(input)
 
+    null_dist_measurements = {'full': null_dist[0], 'ind': null_dist[1], }
+
     if not os.path.exists(output):
         os.mkdir(output)
-    get_min_dist(domains, class_A, class_B, output)
+    get_min_dist(domains, class_A, class_B, domain_label, output)
     
 
 
@@ -117,7 +121,8 @@ if __name__ == "__main__":
     parser.add_argument("--inputs", required=True, help="Directory containing muspan domains")
     parser.add_argument("--output", required=True, help="Output directory for saving csv")
     parser.add_argument("--classes_csv", required=True, help="Path to csv with Class A and Class B")
-
+    parser.add_argument("--domain_label", required=False, help="Name of label of interest in domain", default="Phenotype")
+    parser.add_argument("--null_dist", required=False, help="What null distance measures to include", default=[0,0,0])
 
     args = parser.parse_args()
-    main(args.inputs, args.output, args.classes_csv)
+    main(args.inputs, args.output, args.classes_csv, args.domain_label, args.null_dist)
